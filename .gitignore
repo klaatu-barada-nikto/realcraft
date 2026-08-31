@@ -1,0 +1,66 @@
+# ===== JetBrains (IntelliJ IDEA / PyCharm / WebStorm etc.) =====
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# ===== VS Code / Cursor =====
+.vscode/
+.idea/.vscode/
+*.code-workspace
+.history/
+
+# ===== Eclipse =====
+.classpath
+.project
+.settings/
+.factorypath
+*.launch
+bin/
+
+# ===== NetBeans =====
+nbproject/
+nb-configuration.xml
+
+# ===== Gradle =====
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ===== Maven =====
+target/
+
+# ===== Java =====
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+hs_err_pid*
+replay_pid*
+
+# ===== Fabric Loom (Minecraft) =====
+run/
+
+
+# ===== Local AI tools =====
+.arts/
+.codegraph/
+.codeartsdoer/
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== OS files =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===== Misc =====
+*.swp
+*~
