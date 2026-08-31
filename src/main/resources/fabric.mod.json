@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "realcraft",
+  "version": "${version}",
+  "name": "Realcraft Voxel Builder",
+  "description": "Build voxel models from remote JSON data via admin command.",
+  "authors": [
+    "Administrator"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.realcraft.buildmodel.RealcraftMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
