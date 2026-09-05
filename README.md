@@ -15,26 +15,54 @@
 | 依赖 | 版本 |
 | --- | --- |
 | Java | 21+ |
-| Minecraft | 1.21.1 |
-| Fabric Loader | >= 0.16.9 |
-| Fabric API | 任意兼容版本 |
+| Minecraft | 1.21.11 |
+| Fabric Loader | >= 0.19.5 |
+| Fabric API | 0.141.6+1.21.11 |
 
-## 构建
+## 编译
+
+### 前置条件
+
+- **JDK 21**：`gradle.properties` 中的 `org.gradle.java.home` 已指向 JDK 21 目录；若移除该项，则需确保系统 `JAVA_HOME` 指向 JDK 21
+- **Gradle**：无需手动安装，项目通过 Gradle Wrapper 自动下载 `9.5.1`
+
+### 编译命令
 
 在项目根目录执行：
 
+**Windows（PowerShell / CMD）**
+```bash
+.\gradlew.bat build
+```
+
+**Linux / macOS**
 ```bash
 ./gradlew build
 ```
 
-构建产物位于 `build/libs/`，即 `realcraft-1.0.0.jar`。
+首次构建会自动下载 Gradle 发行版、Minecraft 1.21.11 及依赖，耗时较长，请耐心等待。
+
+### 产物位置
+
+构建成功后位于 `build/libs/`：
+
+- `realcraft-1.0.0.jar` —— 主模组文件（放入 `mods/` 目录）
+- `realcraft-1.0.0-sources.jar` —— 源码包（可选）
+
+### 常用命令
+
+| 命令 | 说明 |
+| --- | --- |
+| `.\gradlew.bat build` | 完整构建（编译 + 打包） |
+| `.\gradlew.bat clean build` | 清理后重新构建 |
+| `.\gradlew.bat remapJar` | 仅重新打包模组 jar |
 
 ## 安装
 
-1. 安装 [Fabric Loader](https://fabricmc.net/use/)（1.21.1 对应版本）并启动一次游戏
-2. 将 [Fabric API](https://modrinth.com/mod/fabric-api) 放入 `mods/` 目录
+1. 安装 [Fabric Loader](https://fabricmc.net/use/)（1.21.11 对应版本，如 `fabric-server-mc.1.21.11-loader.0.19.5-launcher.1.1.2.jar`）并启动一次
+2. 将 [Fabric API](https://modrinth.com/mod/fabric-api)（`0.141.6+1.21.11`）放入 `mods/` 目录
 3. 将构建出的 `realcraft-1.0.0.jar` 放入 `mods/` 目录
-4. 启动游戏
+4. 启动服务端/客户端
 
 ## 使用方法
 

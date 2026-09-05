@@ -8,6 +8,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
@@ -74,14 +75,14 @@ public class ModelBuildJob {
         }
         BlockPlacement placement = placements.get(index++);
         if (!player.isDisconnected()) {
-            player.getServerWorld().setBlockState(placement.getPos(), placement.getState(), 3);
+            player.getEntityWorld().setBlockState(placement.getPos(), placement.getState(), 3);
         }
         return true;
     }
 
     public void notifyComplete() {
         if (!player.isDisconnected()) {
-            player.sendMessage(Text.literal("模型构建完毕！共 " + placements.size() + " 个方块。").withColor(0xFF55FF55), false);
+            player.sendMessage(Text.literal("模型构建完毕！共 " + placements.size() + " 个方块。").withColor(0xFF55FF55));
         }
     }
 }
