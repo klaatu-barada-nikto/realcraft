@@ -8,24 +8,26 @@ import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ModelBuildJob {
     private final ServerPlayerEntity player;
+    private final World world;
     private final List<BlockPlacement> placements;
     private int index;
 
-    private ModelBuildJob(ServerPlayerEntity player, List<BlockPlacement> placements) {
+    private ModelBuildJob(ServerPlayerEntity player, World world, List<BlockPlacement> placements) {
         this.player = player;
+        this.world = world;
         this.placements = placements;
     }
 
-    public static ModelBuildJob fromVoxelBlocks(ServerPlayerEntity player, List<VoxelBlock> blocks) {
+    public static ModelBuildJob fromVoxelBlocks(ServerPlayerEntity player, World world, List<VoxelBlock> blocks) {
         BlockPos playerPos = player.getBlockPos();
         List<BlockPlacement> list = new ArrayList<>(blocks.size());
         for (VoxelBlock voxel : blocks) {
@@ -39,7 +41,7 @@ public class ModelBuildJob {
                 list.add(new BlockPlacement(target, state));
             }
         }
-        return new ModelBuildJob(player, list);
+        return new ModelBuildJob(player, world, list);
     }
 
     private static BlockState resolveBlockState(String blockId) {
@@ -74,15 +76,20 @@ public class ModelBuildJob {
             return false;
         }
         BlockPlacement placement = placements.get(index++);
-        if (!player.isDisconnected()) {
-            player.getEntityWorld().setBlockState(placement.getPos(), placement.getState(), 3);
-        }
+        // 放置只依赖创建任务时捕获的世界，玩家离线仍继续完成
+        world.setBlockState(placement.getPos(), placement.getState(), 3);
         return true;
     }
 
     public void notifyComplete() {
         if (!player.isDisconnected()) {
             player.sendMessage(Text.literal("模型构建完毕！共 " + placements.size() + " 个方块。").withColor(0xFF55FF55));
+        }
+    }
+
+    public void notifyAborted(String reason) {
+        if (!player.isDisconnected()) {
+            player.sendMessage(Text.literal("[buildmodel] 模型构建中断: " + reason).withColor(0xFFFF5555));
         }
     }
 }

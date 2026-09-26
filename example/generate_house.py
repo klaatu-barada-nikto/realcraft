@@ -49,6 +49,7 @@ add(WIDTH // 2, WALL_HEIGHT, DEPTH // 2, "minecraft:lantern")
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "house.json")
 with open(out, "w", encoding="utf-8") as f:
-    json.dump(blocks, f, ensure_ascii=False, indent=2)
+    # 紧凑单行二维数组，与后端 realcraft-platform 的 ModelData.serialize() 产物一致
+    json.dump(blocks, f, ensure_ascii=False, separators=(",", ":"))
 
 print(f"generated {len(blocks)} blocks -> {out}")

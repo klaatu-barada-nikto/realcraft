@@ -1,13 +1,17 @@
 # Realcraft (Realcraft Voxel Builder)
 
-一个基于 [Fabric](https://fabricmc.net/) 的 Minecraft 模组，可通过管理员命令从远程 JSON 数据源拉取体素模型数据，并在世界中自动批量构建方块模型。
+一个基于 [Fabric](https://fabricmc.net/) 的 Minecraft 模组，可通过游戏内命令从远程 JSON 数据源拉取体素模型数据，并在世界中自动批量构建方块模型。
 
 ## 功能特性
 
 - **远程数据构建**：通过 HTTP 下载 JSON 格式的体素模型数据，无需内置模型文件
 - **异步下载**：使用 `HttpClient` 异步拉取数据，不阻塞游戏主线程
+- **地址校验**：仅接受合法的 HTTP(S) 地址，非法地址直接报错并终止本次构建
+- **大小限制**：下载响应体上限 16MB，超限视为获取失败，避免超大响应撑爆内存
 - **分批放置**：每个游戏 tick 最多放置 1000 个方块（`BuildTickHandler.MAX_BLOCKS_PER_TICK`），避免瞬间放置大量方块导致卡顿
 - **任务队列**：支持多个构建任务排队执行，按 FIFO 顺序依次完成
+- **离线续建**：任务一旦入队，即使发起玩家离线也会继续走完队列
+- **异常隔离**：构建过程中出现异常时中断当前模型（不回滚已放置方块），不影响队列中的其他任务
 - **构建反馈**：下载、开始构建、完成均会以彩色消息反馈给执行命令的玩家
 
 ## 环境要求
@@ -18,6 +22,8 @@
 | Minecraft | 1.21.11 |
 | Fabric Loader | >= 0.19.5 |
 | Fabric API | 0.141.6+1.21.11 |
+
+> 本模组为**纯服务端**组件（`fabric.mod.json` 中 `environment` 为 `server`），无需在客户端安装。
 
 ## 编译
 
@@ -73,6 +79,7 @@
 ```
 
 - `<url>`：指向 JSON 体素模型数据的完整 HTTP(S) 地址，参数之间可含空格
+- **任何玩家均可执行，无需管理员权限**
 - 该指令只能由玩家执行，服务端控制台无法执行
 
 执行后模组会以执行者所在位置为原点构建模型：
@@ -81,14 +88,10 @@
 
 ### JSON 数据格式
 
-请求的 URL 需返回一个 JSON 数组，每个元素描述一个方块（紧凑数组，元素顺序为 `id, x, y, z`）：
+请求的 URL 需返回一个 JSON 数组，每个元素描述一个方块（紧凑数组，元素顺序为 `id, x, y, z`）。后端（realcraft-platform）产出的即为**紧凑单行**二维数组：
 
 ```json
-[
-  ["minecraft:stone", 0, 0, 0],
-  ["minecraft:cobblestone", 1, 0, 0],
-  ["minecraft:glass", 0, 1, 0]
-]
+[["minecraft:stone",0,0,0],["minecraft:cobblestone",1,0,0],["minecraft:glass",0,1,0]]
 ```
 
 元素说明：
@@ -101,9 +104,14 @@
 注意事项：
 
 - 每个元素必须是 4 个字段的数组，格式错误会被判为解析失败
+- 紧凑格式为规范格式；解析器会忽略元素之间的空白符，但请以上述紧凑单行为准
 - `id` 必须为游戏内已注册的方块 ID，无法解析的方块（如 ID 非法、方块不存在、为空）会被跳过
 - 数据为空或 JSON 解析失败时会在聊天栏提示错误
 - HTTP 非 200 状态码、连接超时（10 秒）、请求超时（30 秒）均视为获取失败
+- **地址校验**：URL 必须为非空、可解析的 HTTP(S) 地址且包含主机名，否则报错且不会开始构建
+- **大小限制**：响应体超过 **16MB** 视为获取失败
+- **异常处理**：构建过程中出现异常会中断当前模型并提示错误，已放置的方块不会回滚
+- **离线续建**：任务入队后，即使发起玩家离线，队列仍会继续完成该构建
 
 ## 项目结构
 
@@ -114,7 +122,7 @@ src/main/java/com/realcraft/buildmodel/
 │   └── BuildModelCommand.java # /buildmodel 命令注册与参数解析
 ├── service/
 │   ├── ModelBuildService.java # 构建流程编排：下载 -> 入队
-│   ├── ModelDownloader.java   # HTTP 异步下载与 JSON 解析
+│   ├── ModelDownloader.java   # HTTP 异步下载、URL 校验、大小限制与 JSON 解析
 │   └── ModelDownloadException.java
 ├── model/
 │   ├── VoxelBlock.java        # 体素方块数据（id/x/y/z）
